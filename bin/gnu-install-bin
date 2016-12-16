@@ -2,12 +2,12 @@
 
 require 'optparse'
 
-options = {show_help: false, debug: false}
+options = {show_help: false, verbose: false, debug: false}
 
 begin
 
-  # rootpath = File.dirname(File.dirname(__FILE__))
-  # $: << File.join(rootpath,'lib')
+  rootpath = File.dirname(__FILE__)
+  $: << File.join(rootpath,'lib')
 
   $stderr.print "gnu-install-bin 0.0.1-pre1 Copyright (C) 2016-2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
   USAGE =<<EOU
@@ -15,6 +15,8 @@ begin
   gnu-install-bin is a one-click binary software installer
 
 EOU
+
+  require "messages"
 
   opts = OptionParser.new do |o|
     o.banner = "Usage: #{File.basename($0)} [options] [target-dir]\n\n"
@@ -29,8 +31,7 @@ EOU
       options[:verbose] = v
     end
 
-    o.on("--debug", "Show debug messages") do |v|
-      Bio::Log::CLI.trace('debug')
+    o.on("--debug", "Show debug messages") do |d|
       options[:debug] = true
     end
 
@@ -60,4 +61,33 @@ rescue => msg
     $stderr.print "Error: ",msg,"\n"
     exit 1
   end
+end
+
+include Messages
+
+init(options)
+debug(options)
+
+info(ARGV)
+target_dir1 =
+  if ARGV.size > 0
+    ARGV.shift
+  else
+    Dir.pwd
+  end
+
+info("Got target dir #{target_dir1}")
+target_dir = File.expand_path(target_dir1)
+info("Expand target dir to #{target_dir}")
+
+info("Changing into directory #{rootpath}")
+Dir.chdir(rootpath)
+
+if not File.directory?('./gnu/store')
+  error("This is odd: /gnu/store does not existing in package directory #{rootpath}")
+end
+
+info("Processing files")
+Dir['**/*'].each do | fn |
+  debug("Process #{fn}")
 end
