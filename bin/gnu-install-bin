@@ -6,12 +6,10 @@ options = {show_help: false, debug: false}
 
 begin
 
-  rootpath = File.dirname(File.dirname(__FILE__))
-  $: << File.join(rootpath,'lib')
+  # rootpath = File.dirname(File.dirname(__FILE__))
+  # $: << File.join(rootpath,'lib')
 
-  _VERSION = File.new(File.join(rootpath,'VERSION')).read.chomp
-
-  $stderr.print "gnu-install-bin "+_VERSION+" Copyright (C) 2016-2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
+  $stderr.print "gnu-install-bin 0.0.1-pre1 Copyright (C) 2016-2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
   USAGE =<<EOU
 
   gnu-install-bin is a one-click binary software installer
