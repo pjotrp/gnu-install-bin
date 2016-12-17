@@ -131,8 +131,7 @@ Dir['**/*'].each do | fn |
   info "Contains /gnu/store reference in #{fn}"
   debug result
   refs = result.split("\n").map {|line|
-    i,s = line.split(nil,2)
-    [ i.to_i, s ]
+    parse_real_references(origin_dir, line)
   }
   if !text_file? fn
     addrec.call(fn, { type: :binary, refs: refs } )
