@@ -4,15 +4,21 @@ Linux one-click software installation without root!
 
 ## Introduction
 
-Here we are aiming for that on Linux using the amazing GNU Guix
-software packaging system. Without needing root access and without the
-conflicts other software packaging systems are infamous for.
+Here we are aiming for one-click installs on Linux without root
+privileges using the amazing GNU Guix software packaging
+system.
 
-gnu-install-bin is (a prototype of) a generic software installer for
-relocatable GNU Guix binary packages. It takes an unpacked directory
-of packages as copied from the /gnu/store and copies them to a new
-location (the current working directory by default). In the process it
-translates all contained paths to the new location(s).
+Software deployment without needing root access and without the
+complexity and conflicts other software packaging systems are infamous
+for.
+
+gnu-install-bin is a generic software installer for relocatable GNU
+Guix binary packages. It takes an unpacked directory of packages as
+copied from the /gnu/store and copies them to a new location (the
+current working directory by default). In the process it translates
+all contained paths to the new location(s).
+
+Notice: this project is work in progress.
 
 ## Usage
 
@@ -35,34 +41,29 @@ Root access is *not* required!
 ## Improvements
 
 To remove the Ruby requirement it is possible to bundle travelling
-[Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md).
+[Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md) which has
+been linked against static libraries.
 
-Likewise, patchelf can be made generic to install.
+Likewise, patchelf can be made generic to install by linking against
+static libraries.
 
 ## How does the installer work?
-
-### Directory structure gets copied to target
 
 The installer starts from an unpacked directory structure that gets
 mirrored in the target dir. The origin directory can contain *any*
 type of file. It is up to the package creator to add and strip files.
 
-When a file gets copied it gets checked for its contents:
-
-### Binary files
-
-### Script files
-
-### Other files
+When a file gets copied it gets checked for its contents and patched.
+For more detail check the source code.
 
 ## Security
 
-gnu-install-bin is non-opiniated. That means it is up to the package
-provider who can install modified Guix package contents and additional
-directories and files. The installer can install packages that have
-not been signed and have been downloaded from untrusted
-sources. Signing and adding keys are optional features which may be
-added by the package provider.
+gnu-install-bin is meant to be non-opiniated. That means it is up to
+the package provider who can install modified Guix package contents
+and additional directories and files. The installer can install
+packages that have not been signed and have been downloaded from
+untrusted sources. Signing and adding keys are optional features which
+may be added by the package provider.
 
 ## AUTHOR
 
