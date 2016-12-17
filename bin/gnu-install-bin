@@ -94,20 +94,22 @@ if not File.directory?('./gnu/store')
   error "This is odd: /gnu/store does not existing in package directory #{origin_dir}"
 end
 
+info "Processing files"
 recs = {}
 
-addrec = lambda { |fn,rec|
-  debug fn
-  debug rec
-  if rec[fn] != nil
-    error "#{fn} already processed"
-  end
-  recs[fn] = rec
-}
-
-info "Processing files"
-
 Dir['**/*'].each do | fn |
+  mode = File.stat(fn).mode
+
+  addrec = lambda { |fn,rec|
+    if recs[fn] != nil
+      error "#{fn} already processed"
+    end
+    rec[:mode] = mode
+    debug fn
+    debug rec
+    recs[fn] = rec
+  }
+
   if File.directory? fn
     addrec.call(fn,{ type: :dir})
     next
