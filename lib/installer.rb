@@ -32,8 +32,11 @@ module Installer
       else
         begin
           File.lstat(s)
+          if s !~ /^\.\/gnu\/store/
+            error "Valid reference is pointing outside the store: #{s}"
+          end
           info "YES! #{s}"
-          s[1..-1]
+          s
         rescue Errno::ENOENT
           if s == ""
             nil
@@ -44,6 +47,10 @@ module Installer
       end
     }
     info "Validating <#{fn}>"
-    stripper.call(fn)
+    if fn =~ /^\.\/gnu\/store\/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-/
+      fn
+    else
+      stripper.call(fn)
+    end
   end
 end
