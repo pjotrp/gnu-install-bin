@@ -37,7 +37,7 @@ module Installer
           if s !~ /^\.\/gnu\/store/
             error "Valid reference is pointing outside the store: #{s}"
           end
-          info "YES! #{s}"
+          debug "Valid reference #{s}"
           s
         rescue Errno::ENOENT
           if s == ""
@@ -48,7 +48,7 @@ module Installer
         end
       end
     }
-    info "Validating <#{fn}>"
+    debug "Validating <#{fn}>"
     if fn =~ /^\.\/gnu\/store\/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-/
       fn
     else

@@ -54,15 +54,6 @@ EOU
     options[:invalid_argument] = e.message
   end
 
-rescue => msg
-  if options[:debug]
-    raise
-  else
-    $stderr.print "Error: ",msg,"\n"
-    exit 1
-  end
-end
-
 include Messages
 
 init(options)
@@ -138,5 +129,14 @@ Dir['**/*'].each do | fn |
     addrec.call(fn, { type: :binary, refs: refs } )
   else
     addrec.call(fn, { type: :text, refs: refs } )
+  end
+end
+
+rescue => msg
+  if options[:debug]
+    raise
+  else
+    $stderr.print "Error: ",msg,"\n"
+    exit 1
   end
 end

@@ -12,11 +12,11 @@ module Messages
 
   def debug message
     return if not @options[:debug]
-    $stderr.print message.to_s+"\n"
+    $stderr.print "DEBUG "+message.to_s+"\n"
   end
 
   def error message
-    $stderr.print message.to_s+"\n"
+    $stderr.print "ERROR "+message.to_s+"\n" if @options[:debug]
     raise message
   end
 
