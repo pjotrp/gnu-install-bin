@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby
 
 require 'optparse'
+require 'fileutils'
 
 options = {show_help: false, verbose: false, debug: false}
 
@@ -85,15 +86,15 @@ EOU
     error "This is odd: /gnu/store does not existing in package directory #{origin_dir}"
   end
 
-  info "Processing files"
+  info "Processing files..."
   recs = {}
 
-# ---- Create a list of all file, symlink and dir entries and validate
-#      they exist. A list of embedded ./gnu/store references is also
-#      stored.
+  # ---- Create a list of all file, symlink and dir entries and validate
+  #      they exist. A list of embedded ./gnu/store references is also
+  #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    break if i > 100
+    break if i > 10
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -107,7 +108,11 @@ EOU
     }
 
     if File.directory? fn
-      addrec.call(fn,{ type: :dir})
+      if fn == "gnu/store"
+        addrec.call(fn, { type: :skip })
+      else
+        addrec.call(fn,{ type: :dir})
+      end
       next
     end
     if File.symlink? fn
@@ -116,6 +121,7 @@ EOU
         addrec.call(fn, { type: :symlink, link: link } )
       else
         # addrec.call(fn, { type: :absolute_symlink, link: link } )
+        next if link == "/home/wrk/izip/git/opensource/gnu/gnu-install-bin/bin/gnu-install-bin" or "/home/wrk/izip/git/opensource/gnu/gnu-install-bin/lib" # temporary HACK FIXME
         error "Symlink is pointing outside the store: #{link}"
       end
       next
@@ -137,22 +143,47 @@ EOU
     end
   end
 
-# ---- Resolve all references and create new relative target
+  # ---- Resolve all references and create new relative target
+  info "Resolving references..."
   refs = {}
   recs.each do | fn, rec |
-    if rec[:refs]
-      rec[:refs].each do |ref|
-        ref[1].each { |path|
-          if not refs[path]
-            refs[path] = 'gnu/'+path[12..21]+'-'+path[45..-1]
-          end
-        }
-      end
+    if fn =~ /gnu\/store\/./
+      refs[fn] = 'gnu/'+fn[10..19]+'-'+fn[43..-1]
     end
   end
-  p refs
 
-# ---- Copy files
+  targetref = lambda { |path|
+    if refs[path]
+      target_dir + "/" + refs[path]
+    else
+      target_dir + "/" + path
+    end
+  }
+
+  # ---- Copy files and set mode
+  info "Copy files..."
+  recs.each do | fn, rec |
+    p [fn,rec]
+    tpath = targetref.call(fn)
+    case rec[:type]
+    when :symlink then
+      debug "Symlink for #{tpath}"
+      Dir.chdir(File.dirname(tpath)) { |p|
+        FileUtils.symlink rec[:link], tpath
+      }
+    when :file, :binary, :text then
+      debug "Copy to file #{tpath}"
+      FileUtils.copy fn, tpath
+    when :dir then
+      debug "Create directory #{tpath}"
+      Dir.mkdir tpath
+    when :skip then
+      debug "Skipping #{tpath}"
+      break
+    else
+      error "Uknown type for #{fn}"
+    end
+  end
 
 # ---- Rewrite contained references
 
