@@ -54,83 +54,85 @@ EOU
     options[:invalid_argument] = e.message
   end
 
-include Messages
+  include Messages
 
-init(options)
-debug(options)
+  init(options)
+  debug(options)
 
-info(ARGV)
-target_dir1 =
-  if ARGV.size > 0
-    ARGV.shift
-  else
-    Dir.pwd
-  end
-
-require 'installer'
-include Installer
-
-# ==== Processing starts here
-info("Got target dir #{target_dir1}")
-target_dir = File.expand_path(target_dir1)
-info("Expand target dir to #{target_dir} and create")
-Dir.mkdir target_dir
-
-origin_dir = rootpath
-info "Changing into directory #{origin_dir}"
-Dir.chdir(origin_dir)
-
-info "Checking directory structure of #{origin_dir}"
-if not File.directory?('./gnu/store')
-  error "This is odd: /gnu/store does not existing in package directory #{origin_dir}"
-end
-
-info "Processing files"
-recs = {}
-
-Dir['**/*'].each do | fn |
-  mode = File.stat(fn).mode
-
-  addrec = lambda { |fn,rec|
-    if recs[fn] != nil
-      error "#{fn} already processed"
-    end
-    rec[:mode] = mode
-    debug fn
-    debug rec
-    recs[fn] = rec
-  }
-
-  if File.directory? fn
-    addrec.call(fn,{ type: :dir})
-    next
-  end
-  if File.symlink? fn
-    link = File.readlink fn
-    if link !~ /^\//
-      addrec.call(fn, { type: :symlink, link: link } )
+  info(ARGV)
+  target_dir1 =
+    if ARGV.size > 0
+      ARGV.shift
     else
-      # addrec.call(fn, { type: :absolute_symlink, link: link } )
-      error "Symlink is pointing outside the store: #{link}"
+      Dir.pwd
     end
-    next
+
+  require 'installer'
+  include Installer
+
+  # ==== Processing starts here
+  info("Got target dir #{target_dir1}")
+  target_dir = File.expand_path(target_dir1)
+  info("Expand target dir to #{target_dir} and create")
+  Dir.mkdir target_dir
+
+  origin_dir = rootpath
+  info "Changing into directory #{origin_dir}"
+  Dir.chdir(origin_dir)
+
+  info "Checking directory structure of #{origin_dir}"
+  if not File.directory?('./gnu/store')
+    error "This is odd: /gnu/store does not existing in package directory #{origin_dir}"
   end
-  result = `strings -t d #{fn}|grep '/gnu/store/'`
-  if result == ""
-    addrec.call(fn, { type: :file } )
-    next
+
+  info "Processing files"
+  recs = {}
+
+  # ---- Create a list of all file, symlink and dir entries and validate
+  #      they exist. A list of in-store references is also stored.
+  Dir['**/*'].each do | fn |
+    mode = File.stat(fn).mode
+
+    addrec = lambda { |fn,rec|
+      if recs[fn] != nil
+        error "#{fn} already processed"
+      end
+      rec[:mode] = mode
+      debug fn
+      debug rec
+      recs[fn] = rec
+    }
+
+    if File.directory? fn
+      addrec.call(fn,{ type: :dir})
+      next
+    end
+    if File.symlink? fn
+      link = File.readlink fn
+      if link !~ /^\//
+        addrec.call(fn, { type: :symlink, link: link } )
+      else
+        # addrec.call(fn, { type: :absolute_symlink, link: link } )
+        error "Symlink is pointing outside the store: #{link}"
+      end
+      next
+    end
+    result = `strings -t d #{fn}|grep '/gnu/store/'`
+    if result == ""
+      addrec.call(fn, { type: :file } )
+      next
+    end
+    info "Contains /gnu/store reference in #{fn}"
+    debug result
+    refs = result.split("\n").map {|line|
+      parse_real_references(origin_dir, line)
+    }
+    if !text_file? fn
+      addrec.call(fn, { type: :binary, refs: refs } )
+    else
+      addrec.call(fn, { type: :text, refs: refs } )
+    end
   end
-  info "Contains /gnu/store reference in #{fn}"
-  debug result
-  refs = result.split("\n").map {|line|
-    parse_real_references(origin_dir, line)
-  }
-  if !text_file? fn
-    addrec.call(fn, { type: :binary, refs: refs } )
-  else
-    addrec.call(fn, { type: :text, refs: refs } )
-  end
-end
 
 rescue => msg
   if options[:debug]
