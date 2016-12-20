@@ -7,6 +7,7 @@ module Installer
     status.success? && file_type.include?("text")
   end
 
+  # Find the referenced path and return it with the position in the file
   def parse_real_references(dir,line)
     i,s = line.split(nil,2)
     a1 = s.split(/\/gnu\/store\//).delete_if { |w| w == "" }.map { |item| "./gnu/store/"+item }
@@ -23,7 +24,8 @@ module Installer
   private
 
   # Return filename or nil when invalid. Strip characters of fn until
-  # it returns a valid path.
+  # it returns a valid path. We store a local path './gnu/store' to make
+  # sure we don't accidentally confuse the main /gnu/store.
   def validate_ref(fn)
     stripper = lambda { |s|
       # Strip one letter at a time until we get a hit
