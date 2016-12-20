@@ -88,9 +88,12 @@ EOU
   info "Processing files"
   recs = {}
 
-  # ---- Create a list of all file, symlink and dir entries and validate
-  #      they exist. A list of in-store references is also stored.
-  Dir['**/*'].each do | fn |
+# ---- Create a list of all file, symlink and dir entries and validate
+#      they exist. A list of embedded ./gnu/store references is also
+#      stored.
+
+  Dir['**/*'].each_with_index do | fn,i |
+    break if i > 100
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -133,6 +136,25 @@ EOU
       addrec.call(fn, { type: :text, refs: refs } )
     end
   end
+
+# ---- Resolve all references and create new relative target
+  refs = {}
+  recs.each do | fn, rec |
+    if rec[:refs]
+      rec[:refs].each do |ref|
+        ref[1].each { |path|
+          if not refs[path]
+            refs[path] = 'gnu/'+path[12..21]+'-'+path[45..-1]
+          end
+        }
+      end
+    end
+  end
+  p refs
+
+# ---- Copy files
+
+# ---- Rewrite contained references
 
 rescue => msg
   if options[:debug]
