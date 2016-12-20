@@ -94,7 +94,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    break if i > 10
+    # break if i > 10
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -108,7 +108,7 @@ EOU
     }
 
     if File.directory? fn
-      if fn == "gnu/store"
+      if fn == "gnu/store" or fn == "lib"
         addrec.call(fn, { type: :skip })
       else
         addrec.call(fn,{ type: :dir})
@@ -160,7 +160,7 @@ EOU
     end
   }
 
-  # ---- Copy files and set mode
+  # ---- Copy files
   info "Copy files..."
   recs.each do | fn, rec |
     p [fn,rec]
@@ -179,10 +179,12 @@ EOU
       Dir.mkdir tpath
     when :skip then
       debug "Skipping #{tpath}"
-      break
+      next
     else
       error "Uknown type for #{fn}"
     end
+    # Set mode
+    # File.chmod(rec[:mode],fn)
   end
 
 # ---- Rewrite contained references
