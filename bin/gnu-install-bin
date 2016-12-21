@@ -94,7 +94,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    # break if i > 10
+    # break if i > 100
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -148,7 +148,7 @@ EOU
   refs = {}
   recs.each do | fn, rec |
     if fn =~ /gnu\/store\/./
-      refs[fn] = 'gnu/'+fn[10..19]+'-'+fn[43..-1]
+      refs[fn] = reduce_store_path(fn)
     end
   end
 
@@ -163,7 +163,7 @@ EOU
   # ---- Copy files
   info "Copy files..."
   recs.each do | fn, rec |
-    p [fn,rec]
+    # p [fn,rec]
     tpath = targetref.call(fn)
     case rec[:type]
     when :symlink then
@@ -183,11 +183,26 @@ EOU
     else
       error "Uknown type for #{fn}"
     end
-    # Set mode
-    # File.chmod(rec[:mode],fn)
   end
 
 # ---- Rewrite contained references
+  info "Rewrite references..."
+  recs.select { |id, rec| rec[:refs] }.each do | fn,rec |
+    p [fn,rec]
+    tpath = targetref.call(fn)
+    case rec[:type]
+    when :binary then
+      debug "Relocate binary file #{tpath}"
+    when :text then
+      debug "Relocate text file #{tpath}"
+      rewrite_text(tpath,rec[:refs],targetref)
+    else
+      error "Uknown type for #{fn}"
+    end
+  end
+
+# ---- Set modes
+# File.chmod(rec[:mode],fn)
 
 rescue => msg
   if options[:debug]

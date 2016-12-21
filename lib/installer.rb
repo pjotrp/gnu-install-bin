@@ -21,6 +21,45 @@ module Installer
     [ i.to_i, refs ]
   end
 
+  # Create a shorter version of the store path. It does not matter because
+  # there won't be collisions between relocated packages - they have different
+  # target paths
+  def reduce_store_path fn
+    i = fn.index( /gnu\/store\/./ )
+    if i == nil
+      error "Can not reduce store path #{fn}"
+    end
+    "gnu/"+fn[i+10..i+19]+'-'+fn[i+43..-1]
+  end
+
+  def rewrite_text fn, all_refs, targetref
+    File.open(fn+".patched","w") do |fnew|
+      File.open(fn).each_line do | line |
+        # Get all references and order them longest first
+        rs = all_refs.map { | line_refs |
+          line_refs[1].map { |ref|
+            ref
+          }
+        }.flatten.uniq.sort_by {|x| -x.length}
+
+        replace_all_refs = lambda { |s,rx|
+          rx.each { | r |
+            r2 = r[1..-1] # strip leading dot
+            p r2
+            if s.include?(r2)
+              n = targetref.call(reduce_store_path(r2))
+              info "Found #{r2} and replacing with #{n}"
+              s.gsub!(r2,n)
+            end
+          }
+          s
+        }
+        fnew.write(replace_all_refs.call(line,rs))
+      end
+    end
+
+  end
+
   private
 
   # Return filename or nil when invalid. Strip characters of fn until
