@@ -47,6 +47,8 @@ been linked against static libraries.
 Likewise, patchelf can be made generic to install by linking against
 static libraries.
 
+When a path is longer than the original path we should display a warning.
+
 ## How does the installer work?
 
 The installer starts from an unpacked directory structure that gets

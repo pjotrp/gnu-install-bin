@@ -33,6 +33,28 @@ module Installer
   end
 
   def relocate_binary fn, all_refs, targetref
+    # check for patchelf
+    if `which patchelf`.strip == ""
+      error "Can not find patchelf executable in path"
+    end
+    rpath_s = `patchelf --print-rpath #{fn}`
+    rpaths = rpath_s.strip.split(/:/)
+    new_rpath_s = rpaths.map { |rp|
+      targetref.call(reduce_store_path(rp))
+    }.join(":")
+    File.chmod(0755,fn)
+    `patchelf --set-rpath #{new_rpath_s} #{fn}`
+    # print `patchelf --print-needed #{fn}`
+    # Now check the load library
+    interpreter = `patchelf --print-interpreter #{fn}`.strip
+    if interpreter != ""
+      # p interpreter
+      new_interpreter = targetref.call(reduce_store_path(interpreter))
+      print `patchelf --set-interpreter #{new_interpreter} #{fn}`
+      # print `patchelf --print-needed #{fn}`
+      # print `patchelf --print-interpreter #{fn}`.strip
+      # exit
+    end
   end
 
   def relocate_text fn, all_refs, targetref

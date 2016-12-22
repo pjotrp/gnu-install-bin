@@ -94,7 +94,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    # break if i > 100
+    # break if i > 100 # for testing
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -202,8 +202,15 @@ EOU
     end
   end
 
-# ---- Set modes
-# File.chmod(rec[:mode],fn)
+  # ---- Set modes
+  info "Set permissions..."
+  recs.each do | fn, rec |
+    if rec[:mode] and rec[:type] != :skip
+      tpath = targetref.call(fn)
+      debug "Set permissions on #{tpath}"
+      File.chmod(rec[:mode],tpath)
+    end
+  end
 
 # ---- Check modes and warn on remaining references to /gnu/store
 
