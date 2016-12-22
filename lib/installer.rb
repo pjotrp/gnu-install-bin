@@ -73,12 +73,24 @@ module Installer
     # OK, done patching with patchelf. Now we need to see what is left and
     # patch that in raw. Note that patchelf has changed the file locations
     # so we need to reload positions
-        rs = all_refs.map { | line_refs |
-          line_refs[1].map { |ref|
-            ref
-          }
-        }.flatten.uniq.sort_by {|x| -x.length}
-
+    result = `strings -t d #{fn}|grep '/gnu/store/'`
+    if result != "" and fn !~ /-bash-static/
+      debug "Hard patching #{fn}"
+      debug result
+      rs = result.split("\n").map {|line|
+        parse_real_references(line)
+      }
+      rs.each { | rec |
+        pos = rec[0]
+        rec[1].each { | r |
+          p r
+          r2 = r[1..-1] # strip leading dot
+          n = targetref.call(reduce_store_path(r2))
+          info "Found #{r2} and replacing with #{n}"
+        }
+      }
+      exit
+    end
   end
 
   def relocate_text fn, all_refs, targetref

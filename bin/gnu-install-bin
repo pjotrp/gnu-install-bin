@@ -94,7 +94,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    # break if i > 100 # for testing
+    break if i > 1000 # for testing
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
