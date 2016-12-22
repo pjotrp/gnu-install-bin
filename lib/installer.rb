@@ -40,7 +40,7 @@ module Installer
   # there won't be collisions between relocated packages - they have different
   # target paths
   def reduce_store_path fn
-    i = fn.index( /gnu\/store\/./ )
+    i = fn.index( /gnu\/store\/\w/ )
     if i == nil
       error "Can not reduce store path #{fn}"
     end
@@ -85,11 +85,19 @@ module Installer
         rec[1].each { | r |
           p r
           r2 = r[1..-1] # strip leading dot
+          next if r2 == "/gnu/store//"
           n = targetref.call(reduce_store_path(r2))
           info "Found #{r2} and replacing with #{n}"
+          if n.size > r2.size
+            error "Sorry, reference can not increase in size. #{n} is larger than #{r2}"
+          end
+          File.open("newpath","wb") do |f|
+            f.printf "/lib64/ld-linux-x86-64.so.2\x00"
+          end
+          debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
+          print `dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc`
         }
       }
-      exit
     end
   end
 

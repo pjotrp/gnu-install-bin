@@ -94,7 +94,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    break if i > 1000 # for testing
+    # break if i > 1000 # for testing
     mode = File.stat(fn).mode
 
     addrec = lambda { |fn,rec|
@@ -211,7 +211,7 @@ EOU
       result = `strings -t d #{tpath}|grep 'gnu/store/'`
       if result != ""
         print result
-        error "File still contains reference(s) to the store #{tpath}"
+        warning "File #{tpath} still contains reference(s) to the store"
       end
     end
   end

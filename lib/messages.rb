@@ -10,6 +10,10 @@ module Messages
     $stderr.print message.to_s+"\n"
   end
 
+  def warning message
+    $stderr.print "WARNING "+message.to_s+"\n"
+  end
+
   def debug message
     return if not @options[:debug]
     $stderr.print "DEBUG "+message.to_s+"\n"
