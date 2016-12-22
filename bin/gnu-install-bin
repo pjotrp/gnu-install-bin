@@ -126,16 +126,8 @@ EOU
       end
       next
     end
-    result = `strings -t d #{fn}|grep '/gnu/store/'`
-    if result == ""
-      addrec.call(fn, { type: :file } )
-      next
-    end
-    info "Contains /gnu/store reference in #{fn}"
-    debug result
-    refs = result.split("\n").map {|line|
-      parse_real_references(origin_dir, line)
-    }
+    refs = get_all_refs(fn, addrec)
+    next if refs == nil
     if !text_file? fn
       addrec.call(fn, { type: :binary, refs: refs } )
     else
@@ -207,8 +199,20 @@ EOU
   recs.each do | fn, rec |
     if rec[:mode] and rec[:type] != :skip
       tpath = targetref.call(fn)
-      debug "Set permissions on #{tpath}"
+      # debug "Set permissions on #{tpath}"
       File.chmod(rec[:mode],tpath)
+    end
+  end
+
+  info "Final check of relative paths..."
+  recs.each do | fn, rec |
+    if rec[:mode] and rec[:type] != :skip and rec[:type] != :dir and fn !~ /-bash-static-/
+      tpath = targetref.call(fn)
+      result = `strings -t d #{tpath}|grep 'gnu/store/'`
+      if result != ""
+        print result
+        error "File still contains reference(s) to the store #{tpath}"
+      end
     end
   end
 

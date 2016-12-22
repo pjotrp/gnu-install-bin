@@ -7,8 +7,23 @@ module Installer
     status.success? && file_type.include?("text")
   end
 
+  # Return refs (or nil)
+  def get_all_refs(fn, addrec)
+    result = `strings -t d #{fn}|grep '/gnu/store/'`
+    if result == ""
+      addrec.call(fn, { type: :file } )
+      nil
+    else
+      info "Contains /gnu/store reference in #{fn}"
+      debug result
+      result.split("\n").map {|line|
+        parse_real_references(line)
+      }
+    end
+  end
+
   # Find the referenced path and return it with the position in the file
-  def parse_real_references(dir,line)
+  def parse_real_references(line)
     i,s = line.split(nil,2)
     a1 = s.split(/\/gnu\/store\//).delete_if { |w| w == "" }.map { |item| "./gnu/store/"+item }
     refs = a1.map { |fn|
@@ -55,6 +70,15 @@ module Installer
       # print `patchelf --print-interpreter #{fn}`.strip
       # exit
     end
+    # OK, done patching with patchelf. Now we need to see what is left and
+    # patch that in raw. Note that patchelf has changed the file locations
+    # so we need to reload positions
+        rs = all_refs.map { | line_refs |
+          line_refs[1].map { |ref|
+            ref
+          }
+        }.flatten.uniq.sort_by {|x| -x.length}
+
   end
 
   def relocate_text fn, all_refs, targetref
