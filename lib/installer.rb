@@ -32,7 +32,10 @@ module Installer
     "gnu/"+fn[i+10..i+19]+'-'+fn[i+43..-1]
   end
 
-  def rewrite_text fn, all_refs, targetref
+  def relocate_binary fn, all_refs, targetref
+  end
+
+  def relocate_text fn, all_refs, targetref
     File.open(fn+".patched","w") do |fnew|
       File.open(fn).each_line do | line |
         # Get all references and order them longest first
@@ -45,7 +48,7 @@ module Installer
         replace_all_refs = lambda { |s,rx|
           rx.each { | r |
             r2 = r[1..-1] # strip leading dot
-            p r2
+            # p r2
             if s.include?(r2)
               n = targetref.call(reduce_store_path(r2))
               info "Found #{r2} and replacing with #{n}"
@@ -57,7 +60,9 @@ module Installer
         fnew.write(replace_all_refs.call(line,rs))
       end
     end
-
+    # On success rename files
+    File.unlink(fn)
+    File.rename(fn+'.patched',fn)
   end
 
   private

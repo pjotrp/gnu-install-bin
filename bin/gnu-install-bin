@@ -188,14 +188,15 @@ EOU
 # ---- Rewrite contained references
   info "Rewrite references..."
   recs.select { |id, rec| rec[:refs] }.each do | fn,rec |
-    p [fn,rec]
+    # p [fn,rec]
     tpath = targetref.call(fn)
     case rec[:type]
     when :binary then
       debug "Relocate binary file #{tpath}"
+      relocate_binary(tpath,rec[:refs],targetref)
     when :text then
       debug "Relocate text file #{tpath}"
-      rewrite_text(tpath,rec[:refs],targetref)
+      relocate_text(tpath,rec[:refs],targetref)
     else
       error "Uknown type for #{fn}"
     end
@@ -203,6 +204,8 @@ EOU
 
 # ---- Set modes
 # File.chmod(rec[:mode],fn)
+
+# ---- Check modes and warn on remaining references to /gnu/store
 
 rescue => msg
   if options[:debug]
