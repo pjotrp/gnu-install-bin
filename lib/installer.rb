@@ -65,7 +65,8 @@ module Installer
     if interpreter != ""
       # p interpreter
       new_interpreter = targetref.call(reduce_store_path(interpreter))
-      print `patchelf --set-interpreter #{new_interpreter} #{fn}`
+      res1 = `patchelf --set-interpreter #{new_interpreter} #{fn}`
+      debug res1
       # print `patchelf --print-needed #{fn}`
       # print `patchelf --print-interpreter #{fn}`.strip
       # exit
@@ -83,7 +84,7 @@ module Installer
       rs.each { | rec |
         pos = rec[0]
         rec[1].each { | r |
-          p r
+          # p r
           r2 = r[1..-1] # strip leading dot
           next if r2 == "/gnu/store//"
           n = targetref.call(reduce_store_path(r2))
@@ -95,7 +96,8 @@ module Installer
             f.printf "/lib64/ld-linux-x86-64.so.2\x00"
           end
           debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
-          print `dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc`
+          `dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc`
+          File.unlink("newpath")
         }
       }
     end

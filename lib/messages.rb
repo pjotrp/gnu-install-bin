@@ -11,6 +11,7 @@ module Messages
   end
 
   def warning message
+    return if not @options[:verbose]
     $stderr.print "WARNING "+message.to_s+"\n"
   end
 
