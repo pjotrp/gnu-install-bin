@@ -33,29 +33,27 @@ command gnu-install-bin. Run the installer with
 
 1. Minimal Linux system containing
    * Linux kernel
-2. [patchelf](https://github.com/NixOS/patchelf) on the path (this requirement will be removed in future versions)
-3. A recent Ruby interpreter on the path (this requirement will be removed in future versions)
+   * common basic utilities bash, dd, grep and strings
+2.  on the path (this requirement will be removed in future versions)
 
 Root access is *not* required!
 
 ## Improvements
 
-To remove the Ruby requirement it is possible to bundle travelling
-[Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md) which has
-been linked against static libraries.
-
-Likewise, patchelf can be made generic to install by linking against
-static libraries.
-
-When a path is longer than the original path we should display a warning.
+The current code is written in Ruby and runs on the bundled
+[travelling Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md)
+which has been linked against static libraries. In then future we may
+switch to another implementation. For now it just works (tm).
 
 ## How does the installer work?
 
-The installer starts from an unpacked directory structure that gets
+This installer starts from an unpacked directory structure that gets
 mirrored in the target dir. The origin directory can contain *any*
 type of file. It is up to the package creator to add and strip files.
 
-When a file gets copied it gets checked for its contents and patched.
+When a file gets copied it gets checked for its contents and patched with
+[patchelf](https://github.com/NixOS/patchelf) and the dd system tool.
+
 For more detail check the source code.
 
 ## Security
