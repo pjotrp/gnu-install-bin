@@ -48,28 +48,19 @@ module Installer
   end
 
   def relocate_binary fn, all_refs, targetref
-    # check for patchelf
-    if (shell "which patchelf").strip == ""
-      error "Can not find patchelf executable in path"
-    end
-    rpath_s = shell "patchelf --print-rpath #{fn}"
+    rpath_s = patchelf "--print-rpath #{fn}"
     rpaths = rpath_s.strip.split(/:/)
     new_rpath_s = rpaths.map { |rp|
       targetref.call(reduce_store_path(rp))
     }.join(":")
     File.chmod(0755,fn)
-    shell "patchelf --set-rpath #{new_rpath_s} #{fn}"
-    # print `patchelf --print-needed #{fn}`
-    # Now check the load library
-    interpreter = (shell "patchelf --print-interpreter #{fn}").strip
+    patchelf "--set-rpath #{new_rpath_s} #{fn}"
+    interpreter = patchelf "--print-interpreter #{fn}"
     if interpreter != ""
       # p interpreter
       new_interpreter = targetref.call(reduce_store_path(interpreter))
-      res1 = shell "patchelf --set-interpreter #{new_interpreter} #{fn}"
+      res1 = patchelf "--set-interpreter #{new_interpreter} #{fn}"
       debug res1
-      # print `patchelf --print-needed #{fn}`
-      # print `patchelf --print-interpreter #{fn}`.strip
-      # exit
     end
     # OK, done patching with patchelf. Now we need to see what is left and
     # patch that in raw. Note that patchelf has changed the file locations

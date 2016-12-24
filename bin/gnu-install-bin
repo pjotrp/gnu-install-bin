@@ -29,6 +29,10 @@ EOU
 
     o.separator "\n\tVerbosity:\n\n"
 
+    o.on("--patchelf exec", String, "patchelf command") do |p|
+      options[:patchelf] = p
+    end
+
     o.on("-q", "--quiet", "Run quietly") do |q|
       options[:quiet] = q
     end

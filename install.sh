@@ -17,6 +17,6 @@ fi
 
 # Run the Ruby installer
 echo RUN: $ruby ./bin/gnu-install-bin $*
-$ruby -I ./lib/installer/ ./bin/gnu-install-bin $*
+$ruby -I ./lib/installer/ ./bin/gnu-install-bin --patchelf=./bin/patchelf $*
 echo "Done"
 exit $?

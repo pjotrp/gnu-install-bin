@@ -39,4 +39,8 @@ module Messages
     res
   end
 
+  def patchelf cmd
+    shell @options[:patchelf] + " " + cmd
+  end
+
 end
