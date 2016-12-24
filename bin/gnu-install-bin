@@ -37,8 +37,12 @@ EOU
       options[:verbose] = v
     end
 
-    o.on("--debug", "Show debug messages") do |d|
-      options[:debug] = true
+    o.on("-d", "--debug", "Show debug messages") do |d|
+      if not options[:debug]
+        options[:debug] = true
+      else
+        options[:debug2] = true
+      end
     end
 
     o.separator ""
