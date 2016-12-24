@@ -11,7 +11,7 @@ module Messages
   end
 
   def warning message
-    return if not @options[:verbose]
+    return if @options[:quiet]
     $stderr.print "WARNING "+message.to_s+"\n"
   end
 
@@ -27,14 +27,11 @@ module Messages
 
   def shell cmd
     debug "RUN "+cmd
-    res =
-      if @options[:debug]
-        `#{cmd}`
-      else
-        `#{cmd} 2>/dev/null`
-      end
-    debug res
-    res
+    if @options[:debug] or @options[:verbose]
+      `#{cmd}`.strip
+    else
+      `#{cmd} 2>/dev/null`.strip
+    end
   end
 
 end

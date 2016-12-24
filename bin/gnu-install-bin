@@ -221,7 +221,7 @@ EOU
       tpath = targetref.call(fn)
       result = shell "strings -t d #{tpath}|grep 'gnu/store/'"
       if result != ""
-        debug result
+        warning result
         warning "File #{tpath} still contains reference(s) to the store"
       end
     end
