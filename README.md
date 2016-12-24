@@ -27,14 +27,16 @@ downloaded named guix-hello-2.10-x86\_64.tar.gz it unpacks in a
 directory guix-hello-2.10-x86\_64 which contains the executable
 command gnu-install-bin. Run the installer with
 
-    ./guix-hello-2.10-x86_64/gnu-install-bin [target-dir]
+    ./guix-hello-2.10-x86_64/install.sh [-v] [-d] [target-dir]
+
+If no target-dir is set the current directory is used for
+installation.
 
 ## Requirements
 
-1. Minimal Linux system containing
-   * Linux kernel
-   * common basic utilities bash, dd, grep and strings
-2.  on the path (this requirement will be removed in future versions)
+Minimal Linux system containing common basic utilities bash, dd, grep and strings.
+
+Static versions of ruby and patchelf are included.
 
 Root access is *not* required!
 
@@ -43,7 +45,7 @@ Root access is *not* required!
 The current code is written in Ruby and runs on the bundled
 [travelling Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md)
 which has been linked against static libraries. In then future we may
-switch to another implementation. For now it just works (tm).
+switch to another implementation.
 
 ## How does the installer work?
 
@@ -53,6 +55,10 @@ type of file. It is up to the package creator to add and strip files.
 
 When a file gets copied it gets checked for its contents and patched with
 [patchelf](https://github.com/NixOS/patchelf) and the dd system tool.
+
+patchelf was statically compiled from source with
+
+    g++ -Wall -static -std=c++11 -D_FILE_OFFSET_BITS=64 -g -O2 -DPACKAGE_NAME=\"patchelf\" -DPACKAGE_TARNAME=\"patchelf\" -DPACKAGE_VERSION=\"0.10\" -DPACKAGE_STRING=\"patchelf\ 0.10\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"patchelf\" -DVERSION=\"0.10\" -DPAGESIZE=4096 -I. -D_FILE_OFFSET_BITS=64 patchelf.cc -o patchelf
 
 For more detail check the source code.
 
@@ -86,4 +92,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## HOMEPAGE
 
-Not yet.
+Not yet available.
