@@ -93,8 +93,6 @@ EOU
   Dir.mkdir target_dir
 
   origin_dir = rootpath
-  # info "Changing into directory #{origin_dir}"
-  # Dir.chdir(origin_dir)
 
   info "Checking directory structure of #{origin_dir}"
   if not File.directory?('./gnu/store')
@@ -112,6 +110,10 @@ EOU
     # break if i > 1000 # for testing
     if fn =~ /^(bin|lib|install.sh)/ # skip the installer files
       debug "Skipping #{fn}"
+      next
+    end
+    if fn =~ /\/share\/zoneinfo\/posix$/
+      warn "Symlink #{fn} is not valid"
       next
     end
     mode = File.stat(fn).mode
