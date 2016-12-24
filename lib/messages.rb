@@ -25,4 +25,16 @@ module Messages
     raise message
   end
 
+  def shell cmd
+    debug "RUN "+cmd
+    res =
+      if @options[:debug]
+        `#{cmd}`
+      else
+        `#{cmd} 2>/dev/null`
+      end
+    debug res
+    res
+  end
+
 end

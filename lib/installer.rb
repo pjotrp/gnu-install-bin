@@ -9,7 +9,7 @@ module Installer
 
   # Return refs (or nil)
   def get_all_refs(fn, addrec)
-    result = `strings -t d #{fn}|grep '/gnu/store/'`
+    result = shell "strings -t d #{fn}|grep '/gnu/store/'"
     if result == ""
       addrec.call(fn, { type: :file } )
       nil
@@ -49,23 +49,23 @@ module Installer
 
   def relocate_binary fn, all_refs, targetref
     # check for patchelf
-    if `which patchelf`.strip == ""
+    if (shell "which patchelf").strip == ""
       error "Can not find patchelf executable in path"
     end
-    rpath_s = `patchelf --print-rpath #{fn}`
+    rpath_s = shell "patchelf --print-rpath #{fn}"
     rpaths = rpath_s.strip.split(/:/)
     new_rpath_s = rpaths.map { |rp|
       targetref.call(reduce_store_path(rp))
     }.join(":")
     File.chmod(0755,fn)
-    `patchelf --set-rpath #{new_rpath_s} #{fn}`
+    shell "patchelf --set-rpath #{new_rpath_s} #{fn}"
     # print `patchelf --print-needed #{fn}`
     # Now check the load library
-    interpreter = `patchelf --print-interpreter #{fn}`.strip
+    interpreter = (shell "patchelf --print-interpreter #{fn}").strip
     if interpreter != ""
       # p interpreter
       new_interpreter = targetref.call(reduce_store_path(interpreter))
-      res1 = `patchelf --set-interpreter #{new_interpreter} #{fn}`
+      res1 = shell "patchelf --set-interpreter #{new_interpreter} #{fn}"
       debug res1
       # print `patchelf --print-needed #{fn}`
       # print `patchelf --print-interpreter #{fn}`.strip
@@ -74,7 +74,7 @@ module Installer
     # OK, done patching with patchelf. Now we need to see what is left and
     # patch that in raw. Note that patchelf has changed the file locations
     # so we need to reload positions
-    result = `strings -t d #{fn}|grep '/gnu/store/'`
+    result = shell "strings -t d #{fn}|grep '/gnu/store/'"
     if result != "" and fn !~ /-bash-static/
       debug "Hard patching #{fn}"
       debug result
@@ -95,8 +95,9 @@ module Installer
           File.open("newpath","wb") do |f|
             f.printf "/lib64/ld-linux-x86-64.so.2\x00"
           end
-          debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
-          `dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc`
+          # debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
+          res = shell "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
+          debug res
           File.unlink("newpath")
         }
       }

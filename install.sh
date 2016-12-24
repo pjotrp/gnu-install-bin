@@ -17,5 +17,6 @@ fi
 
 # Run the Ruby installer
 echo RUN: $ruby ./bin/gnu-install-bin $*
-echo $($ruby -I ./lib/installer/ ./bin/gnu-install-bin $*)
-echo "Install script finished"
+$ruby -I ./lib/installer/ ./bin/gnu-install-bin $*
+echo "Done"
+exit $?
