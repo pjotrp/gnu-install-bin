@@ -43,7 +43,7 @@ have been used. It was built using a recent ldc compiler 1.1.0-beta4. It is link
         libc.so.6 => /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/libc.so.6 (0x00007f7454d00000)
         /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/ld-linux-x86-64.so.2 (0x00007f74559e3000)
 
-Which need to be relocated by the installer.
+Which references need to be relocated by the installer.
 
 Fetch and unpack
 
@@ -54,7 +54,7 @@ Run the installer (you can use -v and -d options for verbosity)
 
     ./guix-sambamba-0.6.5-x86_84/install.sh ~/opt/sambamba-0.6.5
 
-Ignore any warnings (harmless here). Run the tool
+Ignore any warnings (harmless here). Run the sambamba tool with
 
     ~/opt/sambamba-0.6.5/gnu/sambamba-0.6.5-c6f52cc/bin/sambamba
 
