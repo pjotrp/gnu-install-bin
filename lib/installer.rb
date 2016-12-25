@@ -44,7 +44,7 @@ module Installer
     if i == nil
       error "Can not reduce store path #{fn}"
     end
-    "gnu/"+fn[i+10..i+19]+'-'+fn[i+43..-1]
+    "gnu/"+fn[i+43..-1]
   end
 
   def relocate_binary fn, all_refs, targetref
@@ -79,17 +79,18 @@ module Installer
           r2 = r[1..-1] # strip leading dot
           next if r2 == "/gnu/store//"
           n = targetref.call(reduce_store_path(r2))
-          info "Found #{r2} and replacing with #{n}"
+          info "Found #{r2} and replacing with #{n} in #{fn}"
           if n.size > r2.size
-            error "Sorry, reference can not increase in size. #{n} is larger than #{r2}"
+            error "Sorry, reference can not increase in size. #{n} is larger than #{r2} in #{fn}\nUse a shorter prefix/install path!"
+          else
+            File.open("newpath","wb") do |f|
+              f.printf "/lib64/ld-linux-x86-64.so.2\x00"
+            end
+            # debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
+            res = shell "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
+            debug res
+            File.unlink("newpath")
           end
-          File.open("newpath","wb") do |f|
-            f.printf "/lib64/ld-linux-x86-64.so.2\x00"
-          end
-          # debug "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
-          res = shell "dd if=newpath of=#{fn} obs=1 seek=#{pos} conv=notrunc"
-          debug res
-          File.unlink("newpath")
         }
       }
     end
@@ -111,7 +112,7 @@ module Installer
             # p r2
             if s.include?(r2)
               n = targetref.call(reduce_store_path(r2))
-              info "Found #{r2} and replacing with #{n}"
+              info "Found #{r2} and replacing with #{n} in #{fn}"
               s.gsub!(r2,n)
             end
           }

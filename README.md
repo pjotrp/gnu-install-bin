@@ -47,6 +47,15 @@ The current code is written in Ruby and runs on the bundled
 which has been linked against static libraries. In then future we may
 switch to another implementation.
 
+There are still a few cases where the patching may not work correctly:
+
+1. Some concatenated records using a colon are missed (glibc i8n)
+2. Strings that do not end in zero in binary files (Java? Python?)
+
+Currently, in binary files, the patcher works back stripping
+characters until it finds a valid file path. This may not always be a
+good idea.
+
 ## How does the installer work?
 
 This installer starts from an unpacked directory structure that gets
