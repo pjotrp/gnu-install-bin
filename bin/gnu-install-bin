@@ -26,7 +26,7 @@ EOU
   require "exec"
 
   opts = OptionParser.new do |o|
-    o.banner = "Usage: #{File.basename($0)} [options] [target-dir]\n\n"
+    o.banner = "Usage: #{File.basename($0)} [options] target-dir\n\n"
 
     o.separator "\n\tVerbosity:\n\n"
 
@@ -79,12 +79,11 @@ EOU
     if ARGV.size > 0
       ARGV.shift
     else
-      Dir.pwd
+      error "No target-dir specified"
     end
 
   require 'installer'
   include Installer
-
 
   # ==== Processing starts here
   info("Got target dir #{target_dir1}")

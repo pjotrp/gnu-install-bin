@@ -25,12 +25,9 @@ Notice: this project is work in progress.
 When a tree gets unpacked it contains the installer. Say a file was
 downloaded named guix-hello-2.10-x86\_64.tar.gz it unpacks in a
 directory guix-hello-2.10-x86\_64 which contains the executable
-command gnu-install-bin. Run the installer with
+command install.sh. Run the installer with
 
-    ./guix-hello-2.10-x86_64/install.sh [-v] [-d] [target-dir]
-
-If no target-dir is set the current directory is used for
-installation.
+    ./guix-hello-2.10-x86_64/install.sh [-v] [-d] target-dir
 
 ## Requirements
 
@@ -64,6 +61,8 @@ type of file. It is up to the package creator to add and strip files.
 
 When a file gets copied it gets checked for its contents and patched with
 [patchelf](https://github.com/NixOS/patchelf) and the dd system tool.
+
+All installer related files are in the ./installer/ directory.
 
 patchelf was statically compiled from source with
 

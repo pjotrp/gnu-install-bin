@@ -18,7 +18,6 @@ if [ -e VERSION ]; then
 fi
 
 # Run the Ruby installer
-echo RUN: $ruby $gnu-install-bin $*
 $ruby -I ./installer/lib/installer/ $gnu_install_bin --patchelf=$patchelf $*
 echo "Done"
 exit $?
