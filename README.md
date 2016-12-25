@@ -29,29 +29,34 @@ command install.sh. Run the installer with
 
     ./guix-hello-2.10-x86_64/install.sh [-v] [-d] target-dir
 
-## Requirements
+## Example
 
-Minimal Linux system containing common basic utilities bash, dd, grep and strings.
+Sambamba is a package defined in [guix-bioinformatics](https://github.com/genenetwork/guix-bioinformatics/blob/master/gn/packages/bioinformatics.scm#L923). By the SHA values you can check the git versions that
+have been used. It was built using a recent ldc compiler 1.1.0-beta4. It is linked against
 
-Static versions of ruby and patchelf are included.
+    ldd guix-sambamba-0.6.5-x86_84/gnu/store/bnb76qdkn0fk99l5ph7xbzy51nw188p4-sambamba-0.6.5-c6f52cc/bin/sambamba
+        linux-vdso.so.1 (0x00007fffe95ae000)
+        librt.so.1 => /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/librt.so.1 (0x00007f74557db000)
+        libpthread.so.0 => /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/libpthread.so.0 (0x00007f74555be000)
+        libm.so.6 => /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/libm.so.6 (0x00007f74552b8000)
+        libgcc_s.so.1 => /gnu/store/if3ww39qs6267acvl2l9a0wc78wi960h-gcc-4.9.3-lib/lib/libgcc_s.so.1 (0x00007f74550a2000)
+        libc.so.6 => /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/libc.so.6 (0x00007f7454d00000)
+        /gnu/store/m9vxvhdj691bq1f85lpflvnhcvrdilih-glibc-2.23/lib/ld-linux-x86-64.so.2 (0x00007f74559e3000)
 
-Root access is *not* required!
+Which need to be relocated by the installer.
 
-## Improvements
+Fetch and unpack
 
-The current code is written in Ruby and runs on the bundled
-[travelling Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md)
-which has been linked against static libraries. In then future we may
-switch to another implementation.
+    wget http://biogems.info/contrib/genenetwork/guix-sambamba-0.6.5-x86_84.tgz
+    tar tvzf guix-sambamba-0.6.5-x86_84.tgz
 
-There are still a few cases where the patching may not work correctly:
+Run the installer (you can use -v and -d options for verbosity)
 
-1. Some concatenated records using a colon are missed (glibc i8n)
-2. Strings that do not end in zero in binary files (Java? Python?)
+    ./guix-sambamba-0.6.5-x86_84/install.sh ~/opt/sambamba-0.6.5
 
-Currently, in binary files, the patcher works back stripping
-characters until it finds a valid file path. This may not always be a
-good idea.
+Ignore any warnings (harmless here). Run the tool
+
+    ~/opt/sambamba-0.6.5/gnu/sambamba-0.6.5-c6f52cc/bin/sambamba
 
 ## How does the installer work?
 
@@ -64,11 +69,23 @@ When a file gets copied it gets checked for its contents and patched with
 
 All installer related files are in the ./installer/ directory.
 
-patchelf was statically compiled from source with
+## Requirements
 
-    g++ -Wall -static -std=c++11 -D_FILE_OFFSET_BITS=64 -g -O2 -DPACKAGE_NAME=\"patchelf\" -DPACKAGE_TARNAME=\"patchelf\" -DPACKAGE_VERSION=\"0.10\" -DPACKAGE_STRING=\"patchelf\ 0.10\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"patchelf\" -DVERSION=\"0.10\" -DPAGESIZE=4096 -I. -D_FILE_OFFSET_BITS=64 patchelf.cc -o patchelf
+Minimal Linux system containing common basic utilities bash, dd, grep and strings.
 
-For more detail check the source code.
+Static versions of ruby and patchelf are included.
+
+Root access is *not* required!
+
+## Known issues
+
+1. Internationalization (i8n, locales) is not working
+2. If the prefix is too long the installer will stop
+3. Rewriting some binary file non-elf formats may not (yet) work
+
+Currently, in binary files, the patcher works back stripping
+characters until it finds a valid file path. This may be a bad
+idea. We'll have to take it case by case.
 
 ## Security
 
@@ -78,6 +95,21 @@ and additional directories and files. The installer can install
 packages that have not been signed and have been downloaded from
 untrusted sources. Signing and adding keys are optional features which
 may be added by the package provider.
+
+## Included binaries
+
+### patchelf
+
+patchelf was statically compiled from source with
+
+    g++ -Wall -static -std=c++11 -D_FILE_OFFSET_BITS=64 -g -O2 -DPACKAGE_NAME=\"patchelf\" -DPACKAGE_TARNAME=\"patchelf\" -DPACKAGE_VERSION=\"0.10\" -DPACKAGE_STRING=\"patchelf\ 0.10\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"patchelf\" -DVERSION=\"0.10\" -DPAGESIZE=4096 -I. -D_FILE_OFFSET_BITS=64 patchelf.cc -o patchelf
+
+### Travelling Ruby
+
+The current code is written in Ruby and runs on the bundled
+[travelling Ruby](https://github.com/phusion/traveling-ruby/blob/master/TUTORIAL-1.md)
+which has been linked against static libraries. In then future we may
+switch to another implementation.
 
 ## AUTHOR
 
