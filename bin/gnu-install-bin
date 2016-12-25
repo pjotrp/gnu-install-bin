@@ -108,7 +108,7 @@ EOU
 
   Dir['**/*'].each_with_index do | fn,i |
     # break if i > 1000 # for testing
-    if fn =~ /^(bin|lib|install.sh)/ # skip the installer files
+    if fn =~ /^install/ # skip the installer files
       debug "Skipping #{fn}"
       next
     end
@@ -142,9 +142,9 @@ EOU
         addrec.call(fn, { type: :symlink, link: link } )
       else
         # addrec.call(fn, { type: :absolute_symlink, link: link } )
-        if not do_skip.include?(fn)
+        # if not do_skip.include?(fn)
           error "Symlink is pointing outside the store: #{fn} => #{link}"
-        end
+        # end
       end
       next
     end

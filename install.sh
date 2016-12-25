@@ -3,8 +3,9 @@
 # Installer wrapper for gnu-install-bin
 #
 
-ruby=./bin/traveling-ruby-20141215-2.1.5-linux-x86_64/bin/ruby
-patchelf=./bin/patchelf
+ruby=./installer/bin/traveling-ruby-20141215-2.1.5-linux-x86_64/bin/ruby
+patchelf=./installer/bin/patchelf
+gnu_install_bin=./installer/bin/gnu-install-bin
 
 # Chainge into package dir
 pkgdir=$(dirname $0)
@@ -17,7 +18,7 @@ if [ -e VERSION ]; then
 fi
 
 # Run the Ruby installer
-echo RUN: $ruby ./bin/gnu-install-bin $*
-$ruby -I ./lib/installer/ ./bin/gnu-install-bin --patchelf=$patchelf $*
+echo RUN: $ruby $gnu-install-bin $*
+$ruby -I ./installer/lib/installer/ $gnu_install_bin --patchelf=$patchelf $*
 echo "Done"
 exit $?
