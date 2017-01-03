@@ -5,6 +5,7 @@
 
 ruby=./installer/bin/traveling-ruby-20141215-2.1.5-linux-x86_64/bin/ruby
 patchelf=./installer/bin/patchelf
+guix_relocate=./installer/bin/guix-relocate
 gnu_install_bin=./installer/bin/gnu-install-bin
 
 # Chainge into package dir
@@ -18,6 +19,6 @@ if [ -e VERSION ]; then
 fi
 
 # Run the Ruby installer
-$ruby -I ./installer/lib/installer/ $gnu_install_bin --patchelf=$patchelf $*
+$ruby -I ./installer/lib/installer/ $gnu_install_bin --guix-relocate=$guix_relocate --patchelf=$patchelf $*
 echo "Done"
 exit $?

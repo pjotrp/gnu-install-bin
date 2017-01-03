@@ -8,14 +8,14 @@
 require 'optparse'
 require 'fileutils'
 
-options = {show_help: false, verbose: false, debug: false}
+options = {strategy: :default, show_help: false, verbose: false, debug: false}
 
 begin
 
   rootpath = File.dirname(__FILE__)
   $: << File.join(rootpath,'lib')
 
-  $stderr.print "gnu-install-bin 0.0.1-pre1 Copyright (C) 2016-2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
+  $stderr.print "gnu-install-bin 0.0.1-pre1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
   USAGE =<<EOU
 
   gnu-install-bin is a one-click binary software installer
@@ -30,8 +30,16 @@ EOU
 
     o.separator "\n\tVerbosity:\n\n"
 
+    o.on("--strategy default,fixed,expand", String, "patchelf command") do |s|
+      options[:strategy] = s.to_sym
+    end
+
     o.on("--patchelf exec", String, "patchelf command") do |p|
       options[:patchelf] = p
+    end
+
+    o.on("--guix-relocate exec", String, "guix-relocate command") do |p|
+      options[:guix_relocate] = p
     end
 
     o.on("-q", "--quiet", "Run quietly") do |q|

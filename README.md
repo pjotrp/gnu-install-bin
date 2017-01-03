@@ -32,7 +32,7 @@ command install.sh. Run the installer with
 ## Example
 
 Sambamba is a package defined in [guix-bioinformatics](https://github.com/genenetwork/guix-bioinformatics/blob/master/gn/packages/bioinformatics.scm#L923). By the SHA values you can check the git versions that
-have been used. It was built using a recent ldc compiler 1.1.0-beta4. It is linked against
+have been used. It was built using a recent ldc compiler 1.1.0-beta6. It is linked against
 
     ldd guix-sambamba-0.6.5-x86_84/gnu/store/bnb76qdkn0fk99l5ph7xbzy51nw188p4-sambamba-0.6.5-c6f52cc/bin/sambamba
         linux-vdso.so.1 (0x00007fffe95ae000)
@@ -65,7 +65,8 @@ mirrored in the target dir. The origin directory can contain *any*
 type of file. It is up to the package creator to add and strip files.
 
 When a file gets copied it gets checked for its contents and patched with
-[patchelf](https://github.com/NixOS/patchelf) and the dd system tool.
+[patchelf](https://github.com/NixOS/patchelf) and the dd system tool or,
+altenatively, with the new guix-relocator binary.
 
 All installer related files are in the ./installer/ directory.
 
