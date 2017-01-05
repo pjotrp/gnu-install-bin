@@ -8,7 +8,7 @@
 require 'optparse'
 require 'fileutils'
 
-options = {strategy: :default, show_help: false, verbose: false, debug: false}
+options = {strategy: :fixed, show_help: false, verbose: false, debug: false}
 
 begin
 
@@ -30,8 +30,8 @@ EOU
 
     o.separator "\n\tVerbosity:\n\n"
 
-    o.on("--strategy fit,fixed,expand", String, "patchelf command") do |s|
-      options[:strategy] = s.to_sym
+    o.on("--strategy fixed,fit,expand", [:fixed,:fit,:expand], "Patch strategy (default is fixed)") do |s|
+      options[:strategy] = s
     end
 
     o.on("--patchelf exec", String, "patchelf command") do |p|

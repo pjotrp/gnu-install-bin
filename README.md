@@ -75,9 +75,24 @@ All installer related files are in the ./installer/ directory.
 
 There are three strategies for patching binary files.
 
+### Fixed strategy
+
+The first and, arguably, most safe strategy is *fixed* where all GNU
+path references are patched with the exact same length. Example:
+
+Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
+Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc
+
+You can see we swap the hash position and start 'eating' the path from
+the end all the way down.  The upside is that this should work across
+almost all files, unless the path is stored in unicode or scrambled in
+some way. The downside of the fixed strategy is that a prefix can not
+grow beyond the size of the one in the store. Also every store path
+may look a bit different between installs.
+
 ### Fit strategy
 
-The universal one is *fit* which replaces guix paths with an
+The second strategy is *fit* which replaces guix paths with an
 alternative. Example
 
 Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
@@ -90,25 +105,11 @@ future. If the installer encounters such a file it will bail out.
 
 ### Expand strategy
 
-The second strategy is essentially the same as the *fit* strategy, but
+The third strategy is essentially the same as the *fit* strategy, but
 it will ignore the items it can not expand, say in compiled Python
 .pyc files where the stored path is not zero terminated. It will emit
 a warning instead.
 
-### Fixed strategy
-
-The third and, arguably, safe strategy is *fixed* where all GNU path
-references are patched with the exact same length. Example:
-
-Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
-Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc
-
-You can see we swap the hash position and start 'eating' the path from
-the end all the way down.  The upside is that this should work across
-almost all files, unless the path is stored in unicode or scrambled in
-some way. The downside of the fixed strategy is that a prefix can not
-grow beyond the size of the one in the store. Also every store path
-may look a bit different between installs.
 
 ### What strategy to choose
 
@@ -159,8 +160,8 @@ patchelf is statically compiled from source with
 
 ### guix-relocate
 
-Guix relocate is written in D by the author and is also statically
-compiled.
+Guix relocate is used for the *fixed* strategy and is written in D by
+the author and is also statically compiled.
 
 ### Travelling Ruby
 
