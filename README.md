@@ -14,9 +14,10 @@ for.
 
 gnu-install-bin is a generic software installer for relocatable GNU
 Guix binary packages. It takes an unpacked directory of packages as
-copied from the /gnu/store and copies them to a new location (the
-current working directory by default). In the process it translates
-all contained paths to the new location(s).
+copied from the /gnu/store (this can be created by a closure or guix
+'environment') and copies them to a new location (the current working
+directory by default). In the process it translates all contained
+paths to the new location(s).
 
 Notice: this project is work in progress.
 
@@ -70,23 +71,74 @@ altenatively, with the new guix-relocator binary.
 
 All installer related files are in the ./installer/ directory.
 
+## Strategies
+
+There are three strategies for patching binary files.
+
+### Fit strategy
+
+The universal one is *fit* which replaces guix paths with an
+alternative. Example
+
+Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
+Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c
+
+This works for elf files and all interpreted script files, such as
+from bash and Ruby. It will not work for a number of compiled files,
+such as JAVA byte code and Python pyc, unless we add support in the
+future. If the installer encounters such a file it will bail out.
+
+### Expand strategy
+
+The second strategy is essentially the same as the *fit* strategy, but
+it will ignore the items it can not expand, say in compiled Python
+.pyc files where the stored path is not zero terminated. It will emit
+a warning instead.
+
+### Fixed strategy
+
+The third and, arguably, safe strategy is *fixed* where all GNU path
+references are patched with the exact same length. Example:
+
+Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
+Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc
+
+You can see we swap the hash position and start 'eating' the path from
+the end all the way down.  The upside is that this should work across
+almost all files, unless the path is stored in unicode or scrambled in
+some way. The downside of the fixed strategy is that a prefix can not
+grow beyond the size of the one in the store. Also every store path
+may look a bit different between installs.
+
+### What strategy to choose
+
+The person who writes the installer is responsible for choosing the
+strategy - the strategy is set in the install.sh script. For many
+packages the *fit* or *expand* strategy may work fine. When they do
+not work use the *fixed* strategy. The GNU store path is reasonably
+long, so for most cased fixed size patching will work fine.
+
 ## Requirements
 
 Minimal Linux system containing common basic utilities bash, dd, grep and strings.
 
-Static versions of ruby and patchelf are included.
+Static versions of ruby, guix-relocate and patchelf are included.
 
 Root access is *not* required!
 
 ## Known issues
 
-1. Internationalization (i8n, locales) is not working
-2. If the prefix is too long the installer will stop
-3. Rewriting some binary file non-elf formats may not (yet) work
+1. Internationalization (i8n, locales) is not yet working
+2. If the prefix is too long the installer will stop in the *fit* and
+   *fixed* strategies and *expand* may lead to unpredicted
+   behaviour. Safest to keep the prefix within range.
+3. Rewriting some binary file non-elf formats may not (yet) work for
+   *fit* and *expand* strategies.
 
-Currently, in binary files, the patcher works back stripping
-characters until it finds a valid file path. This may be a bad
-idea. We'll have to take it case by case.
+Currently, for the *fit* and *expand* strategies in binary files, the
+patcher works back stripping characters until it finds a valid file
+path. This may not always be a good idea. We'll have to take it case
+by case.
 
 ## Security
 
@@ -101,9 +153,14 @@ may be added by the package provider.
 
 ### patchelf
 
-patchelf was statically compiled from source with
+patchelf is statically compiled from source with
 
     g++ -Wall -static -std=c++11 -D_FILE_OFFSET_BITS=64 -g -O2 -DPACKAGE_NAME=\"patchelf\" -DPACKAGE_TARNAME=\"patchelf\" -DPACKAGE_VERSION=\"0.10\" -DPACKAGE_STRING=\"patchelf\ 0.10\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"patchelf\" -DVERSION=\"0.10\" -DPAGESIZE=4096 -I. -D_FILE_OFFSET_BITS=64 patchelf.cc -o patchelf
+
+### guix-relocate
+
+Guix relocate is written in D by the author and is also statically
+compiled.
 
 ### Travelling Ruby
 

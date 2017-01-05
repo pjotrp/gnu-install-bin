@@ -30,7 +30,7 @@ EOU
 
     o.separator "\n\tVerbosity:\n\n"
 
-    o.on("--strategy default,fixed,expand", String, "patchelf command") do |s|
+    o.on("--strategy fit,fixed,expand", String, "patchelf command") do |s|
       options[:strategy] = s.to_sym
     end
 
