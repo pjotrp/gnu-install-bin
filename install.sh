@@ -14,7 +14,7 @@ cd $pkgdir
 
 # Check we are not in the source dir
 if [ -e VERSION ]; then
-  echo "This script should not be run in source dir"
+  echo "This script should not be run in source dir of the installer"
   exit 1
 fi
 
