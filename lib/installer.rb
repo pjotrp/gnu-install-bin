@@ -2,6 +2,11 @@ require "open3"
 
 module Installer
 
+  def init options
+    @options = options
+    debug "Installer: #{@options}"
+  end
+
   def text_file?(fn)
     file_type, status = Open3.capture2e("file", fn)
     status.success? && file_type.include?("text")
@@ -36,15 +41,31 @@ module Installer
     [ i.to_i, refs ]
   end
 
-  # Create a shorter version of the store path. It does not matter because
-  # there won't be collisions between relocated packages - they have different
-  # target paths
-  def reduce_store_path fn
+  # Create a new version of the store path. It does not matter what it
+  # ends up being because there won't be collisions between relocated
+  # packages - they have different target paths
+  def reduce_store_path fn, target_dir
     i = fn.index( /gnu\/store\/\w/ )
     if i == nil
       error "Can not reduce store path #{fn}"
     end
-    "gnu/"+fn[i+43..-1]
+    if @options[:strategy] == :fixed
+      # use different path layout - should be the same in guix-relocate tool
+      p1 = fn[i+10..-1]
+      sub_paths = p1.split("/")
+      items = sub_paths[0].split("-")
+      p2 = items[1..-1].join("-") + "-" + items[0] + "padpadpadpadpadpadpadpadpad"
+      # p p1,p2
+      newsize = sub_paths[0].size-target_dir.size+"/gnu/store".size
+      p2[0..newsize-1]+"/"+sub_paths[1..-1].join("/")
+    else
+      "gnu/"+fn[i+43..-1]
+    end
+  end
+
+  def guix_relocate_file fn, targetref
+    p fn, targetref
+    exit 1
   end
 
   def relocate_binary fn, all_refs, targetref

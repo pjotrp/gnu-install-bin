@@ -80,8 +80,8 @@ There are three strategies for patching binary files.
 The first and, arguably, most safe strategy is *fixed* where all GNU
 path references are patched with the exact same length. Example:
 
-Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
-Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc
+Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
+Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc/...
 
 You can see we swap the hash position and start 'eating' the path from
 the end all the way down.  The upside is that this should work across
@@ -95,8 +95,8 @@ may look a bit different between installs.
 The second strategy is *fit* which replaces guix paths with an
 alternative. Example
 
-Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22
-Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c
+Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
+Replace with    /gnu/tmp/hello/gnu/glibc-2.22/...
 
 This works for elf files and all interpreted script files, such as
 from bash and Ruby. It will not work for a number of compiled files,

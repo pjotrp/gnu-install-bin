@@ -58,6 +58,10 @@ EOU
       end
     end
 
+    o.on("--development", "Run shorter development version") do |v|
+      options[:development] = v
+    end
+
     o.separator ""
 
     o.on_tail('-h', '--help', 'Display this help and exit') do
@@ -92,6 +96,7 @@ EOU
 
   require 'installer'
   include Installer
+  Installer.init(options)
 
   # ==== Processing starts here
   info("Got target dir #{target_dir1}")
@@ -114,7 +119,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    # break if i > 1000 # for testing
+    break if options[:development] and i > 2000 # for testing
     if fn =~ /^install/ # skip the installer files
       debug "Skipping #{fn}"
       next
@@ -169,7 +174,7 @@ EOU
   refs = {}
   recs.each do | fn, rec |
     if fn =~ /gnu\/store\/./
-      refs[fn] = reduce_store_path(fn)
+      refs[fn] = reduce_store_path(fn, target_dir)
     end
   end
 
@@ -193,8 +198,12 @@ EOU
         FileUtils.symlink rec[:link], tpath
       }
     when :file, :binary, :text then
-      debug "Copy to file #{tpath}"
-      FileUtils.copy fn, tpath
+      if options[:strategy] == :fixed and rec[:refs]
+        # do nothing, fixed will copy the file anyway
+      else
+        debug "Copy to file #{tpath}"
+        FileUtils.copy fn, tpath
+      end
     when :dir then
       debug "Create directory #{tpath}"
       Dir.mkdir tpath
@@ -211,15 +220,20 @@ EOU
   recs.select { |id, rec| rec[:refs] }.each do | fn,rec |
     # p [fn,rec]
     tpath = targetref.call(fn)
-    case rec[:type]
-    when :binary then
-      debug "Relocate binary file #{tpath}"
-      relocate_binary(tpath,rec[:refs],targetref)
-    when :text then
-      debug "Relocate text file #{tpath}"
-      relocate_text(tpath,rec[:refs],targetref)
+    if options[:strategy] == :fixed
+      debug "guix-relocate #{tpath}"
+      guix_relocate_file(fn,tpath)
     else
-      error "Uknown type for #{fn}"
+      case rec[:type]
+      when :binary then
+        debug "Relocate binary file #{tpath}"
+        relocate_binary(tpath,rec[:refs],targetref)
+      when :text then
+        debug "Relocate text file #{tpath}"
+        relocate_text(tpath,rec[:refs],targetref)
+      else
+        error "Uknown type for #{fn}"
+      end
     end
   end
 

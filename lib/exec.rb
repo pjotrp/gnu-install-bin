@@ -23,4 +23,8 @@ module Exec
     shell @options[:patchelf] + " " + cmd
   end
 
+  def guix_relocate cmd
+    shell @options[:guix_relocate] + " " + cmd
+  end
+
 end
