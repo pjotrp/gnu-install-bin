@@ -13,9 +13,11 @@ module Exec
             `#{cmd} 2>/dev/null`.strip
           end
     retval = $?.exitstatus >> 8
+    p ["******",retval]
     if retval != 0
       error "exit status #{retval} for #{cmd}"
     end
+    print res
     res
   end
 
@@ -24,7 +26,7 @@ module Exec
   end
 
   def guix_relocate cmd
-    shell @options[:guix_relocate] + " " + cmd
+    shell @options[:guix_relocate] + " -v -d " + cmd
   end
 
 end

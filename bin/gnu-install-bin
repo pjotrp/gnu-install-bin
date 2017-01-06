@@ -119,7 +119,7 @@ EOU
   #      stored.
 
   Dir['**/*'].each_with_index do | fn,i |
-    break if options[:development] and i > 2000 # for testing
+    break if options[:development] and i > 2000 # for testing only
     if fn =~ /^install/ # skip the installer files
       debug "Skipping #{fn}"
       next
@@ -155,7 +155,7 @@ EOU
       else
         # addrec.call(fn, { type: :absolute_symlink, link: link } )
         # if not do_skip.include?(fn)
-          error "Symlink is pointing outside the store: #{fn} => #{link}"
+        error "Symlink is pointing outside the store: #{fn} => #{link}"
         # end
       end
       next
@@ -222,7 +222,7 @@ EOU
     tpath = targetref.call(fn)
     if options[:strategy] == :fixed
       debug "guix-relocate #{tpath}"
-      guix_relocate_file(fn,tpath)
+      guix_relocate_file(fn,refs[fn],target_dir)
     else
       case rec[:type]
       when :binary then
@@ -240,7 +240,7 @@ EOU
   # ---- Set modes
   info "Set permissions..."
   recs.each do | fn, rec |
-    if rec[:mode] and rec[:type] != :skip
+    if rec[:mode] and rec[:type] != :skip and rec[:type] != :symlink
       tpath = targetref.call(fn)
       # debug "Set permissions on #{tpath}"
       File.chmod(rec[:mode],tpath)

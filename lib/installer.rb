@@ -63,9 +63,13 @@ module Installer
     end
   end
 
-  def guix_relocate_file fn, targetref
-    p fn, targetref
-    exit 1
+  def guix_relocate_file fn, fnref, prefix
+    include Exec
+    Exec.init(@options)
+    outfn = prefix + "/" + fnref
+    cmd = " --prefix "+prefix+" --origin `pwd` ./"+fn
+    # p ["****",cmd]
+    guix_relocate(cmd)
   end
 
   def relocate_binary fn, all_refs, targetref
