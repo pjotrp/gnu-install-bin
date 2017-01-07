@@ -128,8 +128,17 @@ EOU
       warn "Symlink #{fn} is not valid"
       next
     end
-    mode = File.stat(fn).mode
-
+    begin
+      mode = File.stat(fn).mode
+    rescue Errno::ENOENT
+      if fn =~ /\/gnu\/store\// and File.symlink? fn
+        # There is the special case where a symlink points to nothing in the
+        # store. We emit a warning for that
+        warn "Symlink #{fn} points to nothing in the store!"
+        next
+      end
+      raise
+    end
     addrec = lambda { |fn,rec|
       if recs[fn] != nil
         error "#{fn} already processed"
@@ -153,10 +162,15 @@ EOU
       if link !~ /^\//
         addrec.call(fn, { type: :symlink, link: link } )
       else
-        # addrec.call(fn, { type: :absolute_symlink, link: link } )
-        # if not do_skip.include?(fn)
-        error "Symlink is pointing outside the store: #{fn} => #{link}"
-        # end
+        # It may be the symlink is hard coded to the store, so try this first
+        if link =~ /^\/gnu\/store\//
+          link = "."+link
+          if File.exist?(link)
+            addrec.call(fn, { type: :symlink, link: link } )
+          else
+            error "Symlink is pointing outside the store: #{fn} => #{link}"
+          end
+        end
       end
       next
     end
