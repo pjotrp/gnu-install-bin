@@ -265,7 +265,11 @@ EOU
   recs.each do | fn, rec |
     if rec[:mode] and rec[:type] != :skip and rec[:type] != :dir and fn !~ /-bash-static-/
       tpath = targetref.call(fn)
-      result = shell "strings -t d #{tpath}|grep 'gnu/store/'"
+      result = shell "strings -t d #{tpath}|grep 'gnu/store/'", lambda { |status|
+        if status == 2
+          error "Command failed for some reason"
+        end
+      }
       if result != ""
         warning result
         warning "File #{tpath} still contains reference(s) to the store"

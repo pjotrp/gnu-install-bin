@@ -5,15 +5,15 @@ module Exec
     debug "Exec #{@options}"
   end
 
-  def shell cmd, on_error = nil
+  def shell cmd, handle_error = nil
     debug "RUN "+cmd if @options[:debug2]
     res = if @options[:debug] or @options[:verbose]
             `#{cmd}`.strip
           else
             `#{cmd} 2>/dev/null`.strip
           end
-    if on_error
-      on_error.call($?.exitstatus)
+    if handle_error
+      handle_error.call($?.exitstatus)
     else
       if not $?.success?
         error "exit status #{$?.exitstatus} for #{cmd}"
