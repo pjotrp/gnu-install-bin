@@ -131,9 +131,9 @@ EOU
     begin
       mode = File.stat(fn).mode
     rescue Errno::ENOENT
-      if fn =~ /\/gnu\/store\// and File.symlink? fn
+      if fn =~ /gnu\/store/ and File.symlink? fn
         # There is the special case where a symlink points to nothing in the
-        # store. We emit a warning for that
+        # store. We emit a warning for that and skip the link
         warn "Symlink #{fn} points to nothing in the store!"
         next
       end
