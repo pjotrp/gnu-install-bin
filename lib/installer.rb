@@ -14,7 +14,11 @@ module Installer
 
   # Return refs (or nil)
   def get_all_refs(fn, addrec)
-    result = shell "strings -t d #{fn}|grep '/gnu/store/'"
+    result = shell "strings -t d #{fn}|grep '/gnu/store/'", lambda { |status|
+      if status == 2
+        error "Command failed for some reason"
+      end
+    }
     if result == ""
       addrec.call(fn, { type: :file } )
       nil
@@ -90,7 +94,11 @@ module Installer
     # OK, done patching with patchelf. Now we need to see what is left and
     # patch that in raw. Note that patchelf has changed the file locations
     # so we need to reload positions
-    result = shell "strings -t d #{fn}|grep '/gnu/store/'"
+    result = shell "strings -t d #{fn}|grep '/gnu/store/'", lambda { |status|
+      if status == 2
+        error "Command failed for some reason"
+      end
+    }
     if result != "" and fn !~ /-bash-static/
       debug "Hard patching #{fn}"
       debug result
@@ -169,7 +177,7 @@ module Installer
           end
           debug "Valid reference #{s}"
           s
-        rescue Errno::ENOENT
+        rescue Errno::ENOENT, Errno::ENAMETOOLONG
           if s == ""
             nil
           else
