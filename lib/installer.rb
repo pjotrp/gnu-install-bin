@@ -72,7 +72,6 @@ module Installer
     Exec.init(@options)
     outfn = prefix + "/" + fnref
     cmd = " --prefix "+prefix+" --origin `pwd` ./"+fn
-    # p ["****",cmd]
     guix_relocate(cmd)
   end
 

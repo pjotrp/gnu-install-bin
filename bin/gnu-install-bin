@@ -42,6 +42,10 @@ EOU
       options[:guix_relocate] = p
     end
 
+    o.on("--validate", "Validate") do |q|
+      options[:validate] = q
+    end
+
     o.on("-q", "--quiet", "Run quietly") do |q|
       options[:quiet] = q
     end
@@ -54,7 +58,7 @@ EOU
       if not options[:debug]
         options[:debug] = true
       else
-        options[:debug2] = true
+        options[:debug] = 2
       end
     end
 
@@ -121,11 +125,11 @@ EOU
   Dir['**/*'].each_with_index do | fn,i |
     break if options[:development] and i > 2000 # for testing only
     if fn =~ /^install/ # skip the installer files
-      debug "Skipping #{fn}"
+      debug_debug "Skipping #{fn}"
       next
     end
     if fn =~ /\/share\/zoneinfo\/posix$/
-      warn "Symlink #{fn} is not valid"
+      warning "Symlink #{fn} is not valid"
       next
     end
     begin
@@ -134,7 +138,7 @@ EOU
       if fn =~ /gnu\/store/ and File.symlink? fn
         # There is the special case where a symlink points to nothing in the
         # store. We emit a warning for that and skip the link
-        warn "Symlink #{fn} points to nothing in the store!"
+        warning "Symlink #{fn} points to nothing in the store!"
         next
       end
       raise
@@ -144,8 +148,8 @@ EOU
         error "#{fn} already processed"
       end
       rec[:mode] = mode
-      debug fn
-      debug rec
+      debug_debug fn
+      debug_debug rec
       recs[fn] = rec
     }
 
@@ -174,12 +178,16 @@ EOU
       end
       next
     end
-    refs = get_all_refs(fn, addrec)
-    next if refs == nil
-    if !text_file? fn
-      addrec.call(fn, { type: :binary, refs: refs } )
+    if options[:strategy] == :fixed and not options[:validate]
+      addrec.call(fn, { type: :file, refs: nil })
     else
-      addrec.call(fn, { type: :text, refs: refs } )
+      refs = get_all_refs(fn, addrec)
+      next if refs == nil
+      if !text_file? fn
+        addrec.call(fn, { type: :binary, refs: refs } )
+      else
+        addrec.call(fn, { type: :text, refs: refs } )
+      end
     end
   end
 
@@ -207,19 +215,18 @@ EOU
     tpath = targetref.call(fn)
     case rec[:type]
     when :symlink then
-      debug "Symlink for #{tpath}"
+      link = targetref.call(rec[:link])
+      debug "Symlink #{link} -> #{tpath}"
       Dir.chdir(File.dirname(tpath)) { |p|
-        FileUtils.symlink rec[:link], tpath
+        FileUtils.ln_s link, tpath
       }
     when :file, :binary, :text then
-      if options[:strategy] == :fixed and rec[:refs]
-        # do nothing, fixed will copy the file anyway
-      else
-        debug "Copy to file #{tpath}"
+      if options[:strategy] != :fixed # fixed will copy anyway
+        debug_debug "Copy to file #{tpath}"
         FileUtils.copy fn, tpath
       end
     when :dir then
-      debug "Create directory #{tpath}"
+      debug_debug "Create directory #{tpath}"
       Dir.mkdir tpath
     when :skip then
       debug "Skipping #{tpath}"
@@ -231,13 +238,16 @@ EOU
 
 # ---- Rewrite contained references
   info "Rewrite references..."
-  recs.select { |id, rec| rec[:refs] }.each do | fn,rec |
-    # p [fn,rec]
-    tpath = targetref.call(fn)
-    if options[:strategy] == :fixed
+  if options[:strategy] == :fixed
+    recs.select { |id, rec| rec[:type]==:file }.each do | fn,rec |
+      tpath = targetref.call(fn)
       debug "guix-relocate #{tpath}"
       guix_relocate_file(fn,refs[fn],target_dir)
-    else
+    end
+  else
+    recs.select { |id, rec| rec[:refs] }.each do | fn,rec |
+      # p [fn,rec]
+      tpath = targetref.call(fn)
       case rec[:type]
       when :binary then
         debug "Relocate binary file #{tpath}"
@@ -261,18 +271,20 @@ EOU
     end
   end
 
-  info "Final check of relative paths..."
-  recs.each do | fn, rec |
-    if rec[:mode] and rec[:type] != :skip and rec[:type] != :dir and fn !~ /-bash-static-/
-      tpath = targetref.call(fn)
-      result = shell "strings -t d #{tpath}|grep 'gnu/store/'", lambda { |status|
-        if status == 2
-          error "Command failed for some reason"
+  if options[:validate]
+    info "Final check of relative paths..."
+    recs.each do | fn, rec |
+      if rec[:mode] and rec[:type] != :skip and rec[:type] != :dir and fn !~ /-bash-static-/
+        tpath = targetref.call(fn)
+        result = shell "strings -t d #{tpath}|grep 'gnu/store/'", lambda { |status|
+          if status == 2
+            error "Command failed for some reason"
+          end
+        }
+        if result != ""
+          warning result
+          warning "File #{tpath} still contains reference(s) to the store"
         end
-      }
-      if result != ""
-        warning result
-        warning "File #{tpath} still contains reference(s) to the store"
       end
     end
   end
