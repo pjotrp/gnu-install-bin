@@ -215,8 +215,14 @@ EOU
     tpath = targetref.call(fn)
     case rec[:type]
     when :symlink then
-      link = targetref.call(rec[:link])
-      debug "Symlink #{link} -> #{tpath}"
+      # There are two types of symlinks, relative and absolute
+      # (containing :link=>"./gnu/store/...).
+      link = rec[:link]
+      if link =~ /\/gnu\/store\//
+        # we need to rewrite
+        link = target_dir+"/"+reduce_store_path(link,target_dir)
+      end
+      debug_debug "Symlink #{link} -> #{tpath}"
       Dir.chdir(File.dirname(tpath)) { |p|
         FileUtils.ln_s link, tpath
       }
