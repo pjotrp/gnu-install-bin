@@ -80,23 +80,23 @@ There are three strategies for patching binary files.
 The first and, arguably, most safe strategy is *fixed* where all GNU
 path references are patched with the exact same length. Example:
 
-Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
-Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc/...
+    Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
+    Replace with    /gnu/tmp/hello/glibc-2.22-qv7bk62c22ms9i11dhfl71hnivyc/...
 
 You can see we swap the hash position and start 'eating' the path from
 the end all the way down.  The upside is that this should work across
-almost all files, unless the path is stored in unicode or scrambled in
-some way. The downside of the fixed strategy is that a prefix can not
-grow beyond the size of the one in the store. Also every store path
-may look a bit different between installs.
+almost all files, unless the path is scrambled in some way. The
+downside of the fixed strategy is that a prefix can not grow beyond
+the size of the one in the store. Also every store path may look a bit
+different between installs.
 
 ### Fit strategy
 
 The second strategy is *fit* which replaces guix paths with an
 alternative. Example
 
-Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
-Replace with    /gnu/tmp/hello/gnu/glibc-2.22/...
+    Found @512:     /gnu/store/qv7bk62c22ms9i11dhfl71hnivyc82k2-glibc-2.22/...
+    Replace with    /gnu/tmp/hello/gnu/glibc-2.22/...
 
 This works for elf files and all interpreted script files, such as
 from bash and Ruby. It will not work for a number of compiled files,
@@ -110,14 +110,14 @@ it will ignore the items it can not expand, say in compiled Python
 .pyc files where the stored path is not zero terminated. It will emit
 a warning instead.
 
-
 ### What strategy to choose
 
 The person who writes the installer is responsible for choosing the
 strategy - the strategy is set in the install.sh script. For many
 packages the *fit* or *expand* strategy may work fine. When they do
 not work use the *fixed* strategy. The GNU store path is reasonably
-long, so for most cased fixed size patching will work fine.
+long (about 40 letters including the HASH), so for most cased fixed
+size patching will work fine.
 
 ## Requirements
 
@@ -129,11 +129,10 @@ Root access is *not* required!
 
 ## Known issues
 
-1. Internationalization (i8n, locales) is not yet working
-2. If the prefix is too long the installer will stop in the *fit* and
+1. If the prefix is too long the installer will stop in the *fit* and
    *fixed* strategies and *expand* may lead to unpredicted
    behaviour. Safest to keep the prefix within range.
-3. Rewriting some binary file non-elf formats may not (yet) work for
+2. Rewriting some binary file non-elf formats may not (yet) work for
    *fit* and *expand* strategies.
 
 Currently, for the *fit* and *expand* strategies in binary files, the
@@ -160,8 +159,9 @@ patchelf is statically compiled from source with
 
 ### guix-relocate
 
-Guix relocate is used for the *fixed* strategy and is written in D by
-the author and is also statically compiled.
+[Guix relocate](https://github.com/pjotrp/guix-relocate) is used for
+the *fixed* strategy and is written in D by the author and is also
+statically compiled.
 
 ### Travelling Ruby
 
