@@ -8,7 +8,7 @@ patchelf=./installer/bin/patchelf
 guix_relocate=./installer/bin/guix-relocate
 gnu_install_bin=./installer/bin/gnu-install-bin
 
-# Chainge into package dir
+# Change into package dir
 pkgdir=$(dirname $0)
 cd $pkgdir
 
