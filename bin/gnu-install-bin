@@ -257,7 +257,7 @@ EOU
       case rec[:type]
       when :binary then
         debug "Relocate binary file #{tpath}"
-        relocate_binary(tpath,rec[:refs],targetref)
+        relocate_binary(tpath,rec[:refs],targetref,target_dir)
       when :text then
         debug "Relocate text file #{tpath}"
         relocate_text(tpath,rec[:refs],targetref)

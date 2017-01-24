@@ -75,18 +75,18 @@ module Installer
     guix_relocate(cmd)
   end
 
-  def relocate_binary fn, all_refs, targetref
+  def relocate_binary fn, all_refs, targetref, prefix
     rpath_s = patchelf "--print-rpath #{fn}"
     rpaths = rpath_s.strip.split(/:/)
     new_rpath_s = rpaths.map { |rp|
-      targetref.call(reduce_store_path(rp))
+      targetref.call(reduce_store_path(rp,prefix))
     }.join(":")
     File.chmod(0755,fn)
     patchelf "--set-rpath #{new_rpath_s} #{fn}"
     interpreter = patchelf "--print-interpreter #{fn}"
     if interpreter != ""
       # p interpreter
-      new_interpreter = targetref.call(reduce_store_path(interpreter))
+      new_interpreter = targetref.call(reduce_store_path(interpreter,prefix))
       res1 = patchelf "--set-interpreter #{new_interpreter} #{fn}"
       debug res1
     end
@@ -110,7 +110,7 @@ module Installer
           # p r
           r2 = r[1..-1] # strip leading dot
           next if r2 == "/gnu/store//"
-          n = targetref.call(reduce_store_path(r2))
+          n = targetref.call(reduce_store_path(r2,prefix))
           info "Found #{r2} and replacing with #{n} in #{fn}"
           if n.size > r2.size
             error "Sorry, reference can not increase in size. #{n} is larger than #{r2} in #{fn}\nUse a shorter prefix/install path!"
@@ -143,7 +143,7 @@ module Installer
             r2 = r[1..-1] # strip leading dot
             # p r2
             if s.include?(r2)
-              n = targetref.call(reduce_store_path(r2))
+              n = targetref.call(reduce_store_path(r2,prefix))
               info "Found #{r2} and replacing with #{n} in #{fn}"
               s.gsub!(r2,n)
             end
