@@ -1,9 +1,4 @@
 #! /usr/bin/env ruby
-#
-# Run as
-#
-#   sudo /bin/bash -c "rm -rf hello" ; time ./guix-hello-2.10-x86_64/traveling-ruby-20141215-2.1.5-linux-x86_64/bin/ruby ./guix-hello-2.10-x86_64/gnu-install-bin -v -d hello
-#
 
 require 'optparse'
 require 'fileutils'
@@ -277,6 +272,8 @@ EOU
     end
   end
 
+  # ---- Check modes and warn on remaining references to /gnu/store
+
   if options[:validate]
     info "Final check of relative paths..."
     recs.each do | fn, rec |
@@ -294,8 +291,6 @@ EOU
       end
     end
   end
-
-# ---- Check modes and warn on remaining references to /gnu/store
 
 rescue => msg
   if options[:debug]
