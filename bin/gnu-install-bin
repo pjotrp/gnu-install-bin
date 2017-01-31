@@ -10,7 +10,7 @@ begin
   rootpath = File.dirname(__FILE__)
   $: << File.join(rootpath,'lib')
 
-  $stderr.print "gnu-install-bin 0.0.1-pre1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
+  $stderr.print "gnu-install-bin 0.0.1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
   USAGE =<<EOU
 
   gnu-install-bin is a one-click binary software installer
