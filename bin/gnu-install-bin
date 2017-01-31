@@ -10,10 +10,14 @@ begin
   rootpath = File.dirname(__FILE__)
   $: << File.join(rootpath,'lib')
 
-  $stderr.print "gnu-install-bin 0.0.1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>\n\n"
+  $stderr.print """
+gnu-install-bin 0.0.1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>
+  See also https://github.com/pjotrp/gnu-install-bin
+"""
   USAGE =<<EOU
 
-  gnu-install-bin is a one-click binary software installer
+  gnu-install-bin is a one-click binary software installer of packages
+  produced by the GNU Guix project http://www.gnu.org/software/guix/.
 
 EOU
 
@@ -133,7 +137,7 @@ EOU
       if fn =~ /gnu\/store/ and File.symlink? fn
         # There is the special case where a symlink points to nothing in the
         # store. We emit a warning for that and skip the link
-        warning "Symlink #{fn} points to nothing in the store!"
+        warning "Symlink #{fn} points to nothing in the store (skipping)!"
         next
       end
       raise
