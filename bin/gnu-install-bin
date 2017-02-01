@@ -243,7 +243,7 @@ EOU
         FileUtils.copy fn, tpath
       end
     when :dir then
-      debug_debug "Create directory #{tpath}"
+      debug "Create directory #{tpath}"
       Dir.mkdir tpath
     when :skip then
       debug "Skipping #{tpath}"
