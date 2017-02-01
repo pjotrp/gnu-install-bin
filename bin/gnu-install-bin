@@ -11,8 +11,8 @@ begin
   $: << File.join(rootpath,'lib')
 
   $stderr.print """
-gnu-install-bin 0.0.1 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl>
-  See also https://github.com/pjotrp/gnu-install-bin
+gnu-install-bin 0.0.2 Copyright (C) 2017 Pjotr Prins <pjotr.prins@thebird.nl> and the GNU Guix project.
+    See also https://github.com/pjotrp/gnu-install-bin
 """
   USAGE =<<EOU
 
@@ -41,16 +41,21 @@ EOU
       options[:guix_relocate] = p
     end
 
+    o.on("--force", "Overwrite existing directory structure") do |q|
+      options[:force] = true
+    end
+
     o.on("--validate", "Validate") do |q|
-      options[:validate] = q
+      options[:validate] = true
     end
 
     o.on("-q", "--quiet", "Run quietly") do |q|
-      options[:quiet] = q
+      options[:quiet] = true
     end
 
     o.on("-v", "--verbose", "Run verbosely") do |v|
-      options[:verbose] = v
+      options[:verbose] = true
+      options[:debug] = true
     end
 
     o.on("-d", "--debug", "Show debug messages") do |d|
@@ -104,6 +109,13 @@ EOU
   # ==== Processing starts here
   info("Got target dir #{target_dir1}")
   target_dir = File.expand_path(target_dir1)
+  if options[:force]
+    if File.directory?(target_dir)
+      info("Removing existing target directory (--force was set) #{target_dir}")
+      FileUtils.chmod 0700, Dir.glob(target_dir+'/**/*')
+      FileUtils.remove_entry(target_dir)
+    end
+  end
   info("Expand target dir to #{target_dir} and create")
   Dir.mkdir target_dir
 

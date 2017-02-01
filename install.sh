@@ -1,7 +1,15 @@
 #! /bin/bash
 #
-# Installer wrapper for gnu-install-bin
-#
+
+if [ -z $1 ]; then
+    echo "Installer wrapper for gnu-install-bin. Usage:"
+    echo ""
+    echo "  ./install.sh TARGETDIR [options]"
+    echo ""
+    echo "For options try"
+    echo ""
+    echo "  ./install.sh --help"
+fi
 
 ruby=./installer/bin/traveling-ruby-20141215-2.1.5-linux-x86_64/bin/ruby
 patchelf=./installer/bin/patchelf
@@ -14,7 +22,7 @@ cd $pkgdir
 
 # Check we are not in the source dir
 if [ -e VERSION ]; then
-  echo "This script should not be run in source dir of the installer"
+  echo "ERROR: This script should not be run in source dir of the installer"
   exit 1
 fi
 
