@@ -258,8 +258,13 @@ EOU
   if options[:strategy] == :fixed
     recs.select { |id, rec| rec[:type]==:file }.each do | fn,rec |
       tpath = targetref.call(fn)
-      debug "guix-relocate #{tpath}"
-      guix_relocate_file(fn,refs[fn],target_dir)
+      if fn =~ /\.debug$/
+        debug "Copy to file #{tpath} without relocation"
+        FileUtils.copy fn, tpath
+      else
+        debug "guix-relocate #{tpath}"
+        guix_relocate_file(fn,refs[fn],target_dir)
+      end
     end
   else
     recs.select { |id, rec| rec[:refs] }.each do | fn,rec |

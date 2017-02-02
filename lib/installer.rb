@@ -71,7 +71,7 @@ module Installer
     include Exec
     Exec.init(@options)
     outfn = prefix + "/" + fnref
-    cmd = " --prefix "+prefix+" --origin `pwd` ./"+fn
+    cmd = " --prefix "+prefix+" --origin `pwd` \"./#{fn}\""
     guix_relocate(cmd)
   end
 
